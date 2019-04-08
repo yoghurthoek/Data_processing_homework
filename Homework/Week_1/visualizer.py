@@ -18,17 +18,22 @@ data_dict = {str(key): [] for key in range(START_YEAR, END_YEAR)}
 
 
 # Read csv file
-with open(INPUT_CSV, 'r', encoding = "utf-8-sig") as f:
+with open(INPUT_CSV, 'r', encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
     for row in reader:
         data_dict[row['Year']].append(float(row['Rating']))
 
 # Plot your findings
-plt.plot([year for year in range(START_YEAR, END_YEAR)],
-         [mean(data_dict[key]) for key in data_dict])
+x = [year for year in range(START_YEAR, END_YEAR)]
+y = [mean(data_dict[key]) for key in data_dict]
+plt.xticks(
+    x, ["'08", "'09", "'10", "'11", "'12", "'13", "'14", "'15", "'16", "'17"]
+)
+plt.plot(x, y)
 plt.ylabel("Average Rating")
 plt.xlabel("Year of Release")
-plt.ylim(8,9)
+plt.title("Ratings of highest rated feature films on IMBD over the years")
+plt.ylim(8, 9)
 plt.show()
 
 if __name__ == "__main__":

@@ -30,43 +30,40 @@ def extract_movies(dom):
     # Make empty array
     moviedata = []
 
-    # Add titles to array
-    title = dom.find_all(class_="loadlate")
-    for element in title:
-        moviedata.append([element['alt']])
+    for index, element in enumerate(
+            dom.find_all(class_="lister-item-content")):
 
-    # Add ratings to array
-    rating = dom.find_all(class_="ratings-imdb-rating")
-    for index, element in enumerate(rating):
-        moviedata[index].append(element['data-value'])
+        # Add space to add moviedata
+        moviedata.append([])
 
-    # Add release year to array
-    year = dom.find_all(class_="lister-item-year")
-    for index,element in enumerate(year):
-        moviedata[index].append(findall('\d+',element.string)[0])
+        # Adds Title
+        moviedata[index].append(
+            element.find(class_="lister-item-header").a.string)
 
-    # Add actors to array
-    primeractors = dom.find_all(string=compile("Stars:"))
-    for index,element in enumerate(primeractors):
+        # Adds Rating
+        moviedata[index].append(
+            element.find(class_="ratings-imdb-rating").strong.string)
 
-        # Skip that one movie with no actors
-        if index > 38:
-            if index == 39:
-                moviedata[index].append("".join(["-"]))
-            index += 1
+        # Adds Release year
+        moviedata[index].append(
+            findall(r'\d+', element.find(class_="lister-item-year").string)[0])
 
-        # array to contain actors per film before inserting in big array
+        # Add Actors
         temparray = []
-        for item in element.find_next_siblings("a"):
-            temparray.append(item.string)
-        moviedata[index].append(", ".join(temparray))
+        actors = element.find(string=compile("Stars:"))
+        if actors is not None:
+            for actor in actors.find_next_siblings("a"):
+                temparray.append(actor.string)
+            moviedata[index].append(", ".join(temparray))
+        else:
+            moviedata[index].append("-")
 
-    # Add runtime to array
-    runtime = dom.find_all(class_="runtime")
-    for index,element in enumerate(runtime):
-        moviedata[index].append(findall('\d+', element.string)[0])
+        # Add Runtime
+        moviedata[index].append(
+            element.find(class_="runtime").string.strip(' min'))
 
     return moviedata
+
 
 def save_csv(outfile, movies):
     """
@@ -75,8 +72,8 @@ def save_csv(outfile, movies):
     with open("movies.csv", 'w', encoding='utf-8-sig', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Title', 'Rating', 'Year', 'Actors', 'Runtime'])
-        for index,element in enumerate(movies):
-            writer.writerow(movies[index])
+        for element in movies:
+            writer.writerow(element)
     # ADD SOME CODE OF YOURSELF HERE TO WRITE THE MOVIES TO DISK
 
 
