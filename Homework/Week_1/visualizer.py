@@ -23,7 +23,7 @@ with open(INPUT_CSV, 'r', encoding="utf-8-sig") as f:
     for row in reader:
         data_dict[row['Year']].append(float(row['Rating']))
 
-# Plot your findings
+# Plot my findings
 x = [year for year in range(START_YEAR, END_YEAR)]
 y = [mean(data_dict[key]) for key in data_dict]
 plt.xticks(
