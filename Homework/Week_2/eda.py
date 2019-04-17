@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 # (Make sure unknown get recognized as missing data and comma as decimal sep)
 df = pd.read_csv("input.csv", decimal=",", index_col='Country',
                  na_values="unknown", skipinitialspace=True)
+
+# Clean Whitespaces around regions
 df["Region"] = df["Region"].str.strip()
 
 # Relevant columns for the json file
@@ -20,18 +22,27 @@ GDP = "GDP ($ per capita) dollars"
 df[GDP] = df[GDP].str.replace(" dollars", "")
 df[GDP] = pd.to_numeric(df[GDP], downcast='float')
 
-# Calculate interquantile range
-q1 = df[GDP].quantile(0.25)
-q3 = df[GDP].quantile(0.75)
-iqr = q3 - q1
 
-# Exclude extreme outliers in GDP
-df = df[df[GDP] <= q3 + 3 * iqr]
+def xexoutlier(dafr, column):
+    """
+    Excludes extreme outliers based on IQR range
+    """
+    # Calculate interquantile range
+    q1 = dafr[column].quantile(0.25)
+    q3 = dafr[column].quantile(0.75)
+    iqr = q3 - q1
+    # Exclude extreme outliers in GDP
+    dafr = dafr[dafr[column] <= q3 + 3 * iqr]
+    return dafr
+
+
+# exclude outliers GDP
+df = xexoutlier(df, GDP)
 
 # Look at median, mode, mean and stdev
-print(df[GDP].mean())
-print(df[GDP].median())
-print(df[GDP].mode()[0])
+print(f"Mean GDP : {df[GDP].mean()}\n"
+      + f"Median GDP : {df[GDP].median()}\n"
+      + f"Mode GDP : {df[GDP].mode()[0]}")
 
 # Plot a histogram
 df.hist(column="GDP ($ per capita) dollars", bins=20, grid=False,
@@ -41,16 +52,19 @@ plt.xlabel("GDP ($ per capita) dollars")
 plt.ylabel("Frequency")
 plt.show()
 
-# Look at the five numbers (or use describe, just saying)
+
+# Exclude extreme outliers of infant mort
 babies = "Infant mortality (per 1000 births)"
-print(df[babies].median())
-print(df[babies].quantile(0.25))
-print(df[babies].quantile(0.75))
-print(df[babies].min())
-print(df[babies].max())
+df = xexoutlier(df, babies)
+# Look at the five numbers (or use describe, just saying)
+print(f"Median infant mortality : {df[babies].median()}\n"
+      + f"Q1 infant mortality : {df[babies].quantile(0.25)}\n"
+      + f"Q3 infant mortality : {df[babies].quantile(0.75)}\n"
+      + f"Minimum infant mortality : {df[babies].min()}\n"
+      + f"Maximum infant mortality : {df[babies].max()}")
 
 # Make the boxplot of infant mortality
-df.boxplot(column="Infant mortality (per 1000 births)")
+df.boxplot(column="Infant mortality (per 1000 births)", grid=False)
 plt.title("Kindersterfte")
 plt.show()
 
