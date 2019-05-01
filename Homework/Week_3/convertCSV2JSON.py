@@ -13,7 +13,7 @@ def csvtojson(input):
     no unknown values not default to pandas
     """
     df = pd.read_csv(f"{input}", index_col=0)
-    df.to_json("output.json", orient="index")
+    df.to_json("converted.json", orient="index")
 
 
 if __name__ == "__main__":
